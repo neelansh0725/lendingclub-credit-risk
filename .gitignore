@@ -1,0 +1,22 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Data & model artifacts (model.joblib and metrics.json ARE committed —
+# bundled-in-repo is the deployment strategy, see Tech Stack doc Section 5)
+data/raw/*.csv
+data/processed/*.parquet
+data/mongodb/
+data/mysql/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+
+# Local tooling state
+.claude/
