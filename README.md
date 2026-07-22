@@ -9,7 +9,10 @@ Built as a portfolio project demonstrating applied ML (imbalanced
 classification, gradient boosting, explainability) alongside full-stack
 engineering (FastAPI, React/TypeScript, MongoDB + MySQL, deployment).
 
-**Live demo:** _not yet deployed — see [Deployment](#deployment) below_
+**Live demo:** [lendingclub-credit-risk.vercel.app](https://lendingclub-credit-risk.vercel.app)
+**API docs:** [lendingclub-credit-risk-api.onrender.com/docs](https://lendingclub-credit-risk-api.onrender.com/docs)
+
+*(Backend is on Render's free tier — the first request after a period of inactivity can take ~50s to wake up.)*
 
 ---
 
@@ -200,7 +203,14 @@ Full request/response schemas: `http://localhost:8000/docs`.
 backend (root dir `backend/`, reads `MONGO_URI`, `DATABASE_URL`,
 `FRONTEND_ORIGIN` from the Render dashboard). The frontend deploys to Vercel
 with root directory set to `frontend/` and `VITE_API_BASE_URL` pointing at
-the Render URL.
+the Render URL. `frontend/vercel.json` rewrites all paths to `index.html` so
+client-side routes (`/metrics`, `/batch`, `/collateral`) work on direct
+navigation, not just `/`.
+
+Make sure your MongoDB Atlas IP Access List allows connections from anywhere
+(`0.0.0.0/0`) — Render's outbound IPs aren't static, so restricting to a
+single IP will cause `/predict` and `/batch-predict` to fail with a TLS
+handshake error.
 
 Steps:
 1. Provision a MongoDB Atlas cluster and a cloud MySQL instance (e.g. PlanetScale, Railway)
