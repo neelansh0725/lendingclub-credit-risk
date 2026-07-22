@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { apiClient } from '../api/client'
+import AddCollateralForm, { type NewCollateral } from '../components/AddCollateralForm'
 import CollateralProgressBar from '../components/CollateralProgressBar'
+import CreateLoanForm, { type NewLoan } from '../components/CreateLoanForm'
 import RepaymentForm from '../components/RepaymentForm'
 import StatusBadge from '../components/StatusBadge'
 
@@ -32,6 +34,8 @@ export default function CollateralTracker() {
   const [collaterals, setCollaterals] = useState<Collateral[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [creatingLoan, setCreatingLoan] = useState(false)
+  const [addingCollateral, setAddingCollateral] = useState(false)
   const [newlyReleased, setNewlyReleased] = useState<Collateral[]>([])
 
   const fetchCollaterals = (id: number, flagNewReleases: boolean) => {
@@ -84,9 +88,35 @@ export default function CollateralTracker() {
       .finally(() => setSubmitting(false))
   }
 
+  const handleCreateLoan = (loan: NewLoan) => {
+    setCreatingLoan(true)
+    setError(null)
+    apiClient
+      .post<{ id: number }>('/loans', loan)
+      .then((res) => {
+        setNewlyReleased([])
+        setLoanIdInput(String(res.data.id))
+        setLoanId(res.data.id)
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to create loan'))
+      .finally(() => setCreatingLoan(false))
+  }
+
+  const handleAddCollateral = (collateral: NewCollateral) => {
+    if (loanId === null) return
+    setAddingCollateral(true)
+    apiClient
+      .post<Collateral[]>(`/loans/${loanId}/collaterals`, [collateral])
+      .then(() => fetchCollaterals(loanId, false))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to add collateral'))
+      .finally(() => setAddingCollateral(false))
+  }
+
   return (
     <div className="mx-auto max-w-3xl p-6">
       <h1 className="mb-4 text-2xl font-semibold">Collateral Tracker</h1>
+
+      <CreateLoanForm onSubmit={handleCreateLoan} submitting={creatingLoan} />
 
       <form onSubmit={handleLoadLoan} className="mb-6 flex items-end gap-2">
         <label className="flex flex-col gap-1 text-sm">
@@ -131,7 +161,8 @@ export default function CollateralTracker() {
             </div>
           ))}
 
-          <div className="mt-2">
+          <div className="mt-2 flex flex-col gap-4">
+            <AddCollateralForm onSubmit={handleAddCollateral} submitting={addingCollateral} />
             <RepaymentForm onSubmit={handleRepayment} submitting={submitting} />
           </div>
         </div>

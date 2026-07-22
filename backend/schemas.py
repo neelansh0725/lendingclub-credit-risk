@@ -137,3 +137,25 @@ class CollateralResponse(BaseModel):
     status: str
     released_at: Optional[datetime]
     remaining_amount: float
+
+
+class LoanCreateRequest(BaseModel):
+    applicant_name: str
+    loan_amount: float
+    predicted_risk_tier: str
+
+
+class LoanResponse(BaseModel):
+    id: int
+    applicant_name: str
+    loan_amount: float
+    predicted_risk_tier: str
+    created_at: datetime
+
+
+class CollateralCreateRequest(BaseModel):
+    """FR-22: one collateral to pledge against a loan."""
+    type: str
+    description: str
+    estimated_value: float
+    release_target_amount: float
