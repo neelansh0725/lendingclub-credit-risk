@@ -6,6 +6,9 @@ export interface NewLoan {
   predicted_risk_tier: string
 }
 
+const inputClasses =
+  'rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-tint)]'
+
 export default function CreateLoanForm({
   onSubmit,
   submitting,
@@ -30,31 +33,26 @@ export default function CreateLoanForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6 flex flex-wrap items-end gap-2 rounded border border-gray-200 p-4 dark:border-gray-700">
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Applicant Name</span>
-        <input
-          value={applicantName}
-          onChange={(e) => setApplicantName(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
-        />
+    <form
+      onSubmit={handleSubmit}
+      className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm"
+    >
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-[var(--text-secondary)]">Applicant Name</span>
+        <input value={applicantName} onChange={(e) => setApplicantName(e.target.value)} className={inputClasses} />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Loan Amount ($)</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-[var(--text-secondary)]">Loan Amount ($)</span>
         <input
           type="number"
           value={loanAmount}
           onChange={(e) => setLoanAmount(e.target.value)}
-          className="w-36 rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+          className={`w-36 ${inputClasses}`}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Risk Tier</span>
-        <select
-          value={riskTier}
-          onChange={(e) => setRiskTier(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
-        >
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-[var(--text-secondary)]">Risk Tier</span>
+        <select value={riskTier} onChange={(e) => setRiskTier(e.target.value)} className={inputClasses}>
           <option value="Low">Low</option>
           <option value="Medium">Medium</option>
           <option value="High">High</option>
@@ -63,11 +61,11 @@ export default function CreateLoanForm({
       <button
         type="submit"
         disabled={submitting}
-        className="rounded bg-gray-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        className="rounded-lg bg-[var(--text-primary)] px-4 py-2 text-sm font-semibold text-[var(--page)] shadow-sm hover:opacity-90 disabled:opacity-50"
       >
         {submitting ? 'Creating...' : 'Create New Loan'}
       </button>
-      {error && <span className="text-xs text-red-600 dark:text-red-400">{error}</span>}
+      {error && <span className="text-xs font-medium text-[var(--status-critical)]">{error}</span>}
     </form>
   )
 }

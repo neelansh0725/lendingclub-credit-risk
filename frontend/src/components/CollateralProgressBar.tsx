@@ -11,14 +11,19 @@ export default function CollateralProgressBar({
 
   return (
     <div>
-      <div className="h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
         <div
-          className={`h-2.5 rounded-full transition-all ${status === 'Released' ? 'bg-green-500' : 'bg-blue-500'}`}
-          style={{ width: `${pct}%` }}
+          className="h-2 rounded-full transition-all duration-500"
+          style={{
+            width: `${pct}%`,
+            background: status === 'Released' ? 'var(--status-good)' : 'var(--brand)',
+          }}
         />
       </div>
-      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-        {status === 'Released' ? 'Fully repaid toward target' : `$${remainingAmount.toLocaleString()} remaining to reach $${releaseTarget.toLocaleString()} target`}
+      <div className="mt-1.5 text-xs text-[var(--text-muted)]">
+        {status === 'Released'
+          ? 'Fully repaid toward target'
+          : `$${remainingAmount.toLocaleString()} remaining to reach $${releaseTarget.toLocaleString()} target`}
       </div>
     </div>
   )

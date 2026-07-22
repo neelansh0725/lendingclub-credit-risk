@@ -7,6 +7,9 @@ export interface NewCollateral {
   release_target_amount: number
 }
 
+const inputClasses =
+  'rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-tint)]'
+
 export default function AddCollateralForm({
   onSubmit,
   submitting,
@@ -36,54 +39,49 @@ export default function AddCollateralForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2 rounded border border-gray-200 p-4 dark:border-gray-700">
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Type</span>
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
-        >
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm"
+    >
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-[var(--text-secondary)]">Type</span>
+        <select value={type} onChange={(e) => setType(e.target.value)} className={inputClasses}>
           <option value="vehicle">Vehicle</option>
           <option value="property">Property</option>
           <option value="deposit">Deposit</option>
           <option value="other">Other</option>
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Description</span>
-        <input
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
-        />
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-[var(--text-secondary)]">Description</span>
+        <input value={description} onChange={(e) => setDescription(e.target.value)} className={inputClasses} />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Estimated Value ($)</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-[var(--text-secondary)]">Estimated Value ($)</span>
         <input
           type="number"
           value={estimatedValue}
           onChange={(e) => setEstimatedValue(e.target.value)}
-          className="w-36 rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+          className={`w-36 ${inputClasses}`}
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Release Target ($)</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-[var(--text-secondary)]">Release Target ($)</span>
         <input
           type="number"
           value={releaseTarget}
           onChange={(e) => setReleaseTarget(e.target.value)}
-          className="w-36 rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+          className={`w-36 ${inputClasses}`}
         />
       </label>
       <button
         type="submit"
         disabled={submitting}
-        className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-hover)] disabled:opacity-50"
       >
         {submitting ? 'Adding...' : 'Add Collateral'}
       </button>
-      {error && <span className="text-xs text-red-600 dark:text-red-400">{error}</span>}
+      {error && <span className="text-xs font-medium text-[var(--status-critical)]">{error}</span>}
     </form>
   )
 }

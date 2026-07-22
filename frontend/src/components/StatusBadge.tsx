@@ -1,11 +1,13 @@
-const STYLES: Record<string, string> = {
-  Held: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-  Released: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+const CONFIG: Record<string, { bg: string; text: string; dot: string }> = {
+  Held: { bg: 'bg-[var(--border)]/50', text: 'text-[var(--text-secondary)]', dot: 'bg-[var(--text-muted)]' },
+  Released: { bg: 'bg-[var(--status-good-tint)]', text: 'text-[var(--status-good)]', dot: 'bg-[var(--status-good)]' },
 }
 
 export default function StatusBadge({ status }: { status: string }) {
+  const cfg = CONFIG[status] ?? CONFIG.Held
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STYLES[status] ?? ''}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
       {status}
     </span>
   )

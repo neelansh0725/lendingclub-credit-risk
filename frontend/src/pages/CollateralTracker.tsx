@@ -113,43 +113,57 @@ export default function CollateralTracker() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-4 text-2xl font-semibold">Collateral Tracker</h1>
+    <div className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Collateral Tracker</h1>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          Pledge collateral against a secured loan and track its release as repayments come in.
+        </p>
+      </div>
 
       <CreateLoanForm onSubmit={handleCreateLoan} submitting={creatingLoan} />
 
       <form onSubmit={handleLoadLoan} className="mb-6 flex items-end gap-2">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">Loan ID</span>
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-[var(--text-secondary)]">Loan ID</span>
           <input
             type="number"
             value={loanIdInput}
             onChange={(e) => setLoanIdInput(e.target.value)}
-            className="w-32 rounded border border-gray-300 px-2 py-1.5 dark:border-gray-600 dark:bg-gray-800"
+            className="w-32 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-tint)]"
           />
         </label>
-        <button type="submit" className="rounded bg-gray-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">
+        <button
+          type="submit"
+          className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-hover)]"
+        >
           Load
         </button>
       </form>
 
-      {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="mb-4 text-sm font-medium text-[var(--status-critical)]">{error}</p>}
 
       {newlyReleased.length > 0 && (
-        <div className="mb-6 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-200">
-          {newlyReleased.length} collateral{newlyReleased.length > 1 ? 's' : ''} newly qualified for release:{' '}
-          {newlyReleased.map((c) => c.description).join(', ')}
+        <div
+          className="mb-6 flex items-start gap-2 rounded-xl border p-4 text-sm"
+          style={{ borderColor: 'var(--status-good)', background: 'var(--status-good-tint)', color: 'var(--status-good)' }}
+        >
+          <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full" style={{ background: 'var(--status-good)' }} />
+          <span>
+            <strong>{newlyReleased.length}</strong> collateral{newlyReleased.length > 1 ? 's' : ''} newly qualified for release:{' '}
+            {newlyReleased.map((c) => c.description).join(', ')}
+          </span>
         </div>
       )}
 
       {collaterals && (
         <div className="flex flex-col gap-4">
           {collaterals.map((c) => (
-            <div key={c.id} className="rounded border border-gray-200 p-4 dark:border-gray-700">
-              <div className="mb-2 flex items-center justify-between">
+            <div key={c.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <span className="font-medium">{c.description}</span>{' '}
-                  <span className="text-sm text-gray-500 dark:text-gray-400">({c.type})</span>
+                  <span className="font-medium text-[var(--text-primary)]">{c.description}</span>{' '}
+                  <span className="text-sm text-[var(--text-muted)]">({c.type})</span>
                 </div>
                 <StatusBadge status={c.status} />
               </div>
