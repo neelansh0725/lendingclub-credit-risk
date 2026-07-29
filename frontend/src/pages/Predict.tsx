@@ -1,10 +1,28 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { apiClient } from '../api/client'
 import RiskTierBadge from '../components/RiskTierBadge'
 import type { PredictionResponse } from '../types'
-import { ALL_FIELDS, BUREAU_FIELDS, LOAN_FIELDS, validateField, type FieldConfig } from './predictFields'
+import { BUREAU_FIELDS, LOAN_FIELDS, validateField, type FieldConfig } from './predictFields'
+
+const byKey = (keys: string[]) => LOAN_FIELDS.filter((f) => keys.includes(f.key))
+
+const STEPS: { label: string; fields: FieldConfig[] }[] = [
+  {
+    label: 'Loan Terms',
+    fields: byKey(['loan_amnt', 'term', 'int_rate', 'installment', 'grade', 'sub_grade', 'purpose', 'issue_d', 'initial_list_status', 'disbursement_method']),
+  },
+  {
+    label: 'Applicant Profile',
+    fields: byKey(['emp_length', 'home_ownership', 'annual_inc', 'verification_status', 'addr_state', 'dti']),
+  },
+  { label: 'Credit Profile', fields: BUREAU_FIELDS.slice(0, 16) },
+  { label: 'Account Activity', fields: BUREAU_FIELDS.slice(16, 32) },
+  { label: 'Credit Standing & Limits', fields: BUREAU_FIELDS.slice(32, 48) },
+]
+
+const ALL_FIELDS = STEPS.flatMap((s) => s.fields)
 
 function FieldInput({
   field,
@@ -47,16 +65,66 @@ function FieldInput({
   )
 }
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+function StepIndicator({
+  currentStep,
+  maxStepReached,
+  onStepClick,
+}: {
+  currentStep: number
+  maxStepReached: number
+  onStepClick: (idx: number) => void
+}) {
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-      <h2 className="mb-5 text-base font-semibold text-[var(--text-primary)]">{title}</h2>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">{children}</div>
+    <div className="mb-8 flex items-center">
+      {STEPS.map((step, idx) => {
+        const isCompleted = idx < maxStepReached
+        const isCurrent = idx === currentStep
+        const isReachable = idx <= maxStepReached
+        return (
+          <div key={step.label} className="flex flex-1 items-center last:flex-none">
+            <button
+              type="button"
+              onClick={() => isReachable && onStepClick(idx)}
+              disabled={!isReachable}
+              className="flex flex-col items-center gap-2"
+              style={{ cursor: isReachable ? 'pointer' : 'default' }}
+            >
+              <motion.div
+                animate={{ scale: isCurrent ? 1.1 : 1 }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                style={
+                  isCompleted
+                    ? { background: 'var(--status-good)', color: '#fff' }
+                    : isCurrent
+                    ? { background: 'var(--gradient-accent)', color: '#fff' }
+                    : { background: 'var(--border)', color: 'var(--text-muted)' }
+                }
+              >
+                {isCompleted ? '✓' : idx + 1}
+              </motion.div>
+              <span
+                className="hidden text-center text-xs font-medium sm:block"
+                style={{ color: isCurrent ? 'var(--text-primary)' : 'var(--text-muted)' }}
+              >
+                {step.label}
+              </span>
+            </button>
+            {idx < STEPS.length - 1 && (
+              <div
+                className="mx-2 h-0.5 flex-1 rounded"
+                style={{ background: idx < maxStepReached ? 'var(--status-good)' : 'var(--border)' }}
+              />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
 
 export default function Predict() {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [maxStepReached, setMaxStepReached] = useState(0)
   const [values, setValues] = useState<Record<string, string>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
@@ -67,18 +135,33 @@ export default function Predict() {
     setValues((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSubmitError(null)
-    setResult(null)
-
+  const validateStep = (stepIdx: number): boolean => {
     const nextErrors: Record<string, string> = {}
-    for (const field of ALL_FIELDS) {
+    for (const field of STEPS[stepIdx].fields) {
       const err = validateField(field, values[field.key] ?? '')
       if (err) nextErrors[field.key] = err
     }
-    setErrors(nextErrors)
-    if (Object.keys(nextErrors).length > 0) return
+    setErrors((prev) => ({ ...prev, ...nextErrors }))
+    return Object.keys(nextErrors).length === 0
+  }
+
+  const handleNext = () => {
+    if (!validateStep(currentStep)) return
+    const next = currentStep + 1
+    setCurrentStep(next)
+    setMaxStepReached((prev) => Math.max(prev, next))
+  }
+
+  const handleBack = () => setCurrentStep((s) => Math.max(0, s - 1))
+
+  const handleStepClick = (idx: number) => {
+    if (idx <= maxStepReached) setCurrentStep(idx)
+  }
+
+  const handleSubmit = async () => {
+    if (!validateStep(currentStep)) return
+    setSubmitError(null)
+    setResult(null)
 
     const payload: Record<string, string | number> = {}
     for (const field of ALL_FIELDS) {
@@ -97,9 +180,10 @@ export default function Predict() {
   }
 
   const chartData = result?.top_shap_factors.map((f) => ({ ...f, absValue: Math.abs(f.shap_value) })) ?? []
+  const isLastStep = currentStep === STEPS.length - 1
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
+    <div className="mx-auto max-w-3xl px-6 py-10">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -108,49 +192,75 @@ export default function Predict() {
       >
         <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Single Applicant Prediction</h1>
         <p className="mt-2 text-sm text-[var(--text-muted)]">
-          Enter an applicant's loan and credit bureau details to get an instant default probability and explanation.
+          Step through an applicant's details to get an instant default probability and explanation.
         </p>
       </motion.div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <SectionCard title="Loan & Applicant Details">
-          {LOAN_FIELDS.map((field) => (
-            <FieldInput
-              key={field.key}
-              field={field}
-              value={values[field.key] ?? ''}
-              error={errors[field.key]}
-              onChange={handleChange}
-            />
-          ))}
-        </SectionCard>
+      <StepIndicator currentStep={currentStep} maxStepReached={maxStepReached} onStepClick={handleStepClick} />
 
-        <SectionCard title="Credit Bureau Attributes">
-          {BUREAU_FIELDS.map((field) => (
-            <FieldInput
-              key={field.key}
-              field={field}
-              value={values[field.key] ?? ''}
-              error={errors[field.key]}
-              onChange={handleChange}
-            />
-          ))}
-        </SectionCard>
-
-        <div className="flex items-center gap-4">
-          <motion.button
-            type="submit"
-            disabled={loading}
-            whileHover={{ scale: loading ? 1 : 1.02 }}
-            whileTap={{ scale: loading ? 1 : 0.98 }}
-            className="rounded-lg px-6 py-2.5 text-sm font-bold text-white shadow-md disabled:opacity-50"
-            style={{ background: 'var(--gradient-accent)' }}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
           >
-            {loading ? 'Scoring...' : 'Predict Risk'}
-          </motion.button>
-          {submitError && <p className="text-sm font-medium text-[var(--status-critical)]">{submitError}</p>}
+            <h2 className="mb-5 text-base font-semibold text-[var(--text-primary)]">{STEPS[currentStep].label}</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {STEPS[currentStep].fields.map((field) => (
+                <FieldInput
+                  key={field.key}
+                  field={field}
+                  value={values[field.key] ?? ''}
+                  error={errors[field.key]}
+                  onChange={handleChange}
+                />
+              ))}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="mt-8 flex items-center justify-between border-t border-[var(--border)] pt-6">
+          <button
+            type="button"
+            onClick={handleBack}
+            disabled={currentStep === 0}
+            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] disabled:opacity-40"
+          >
+            Back
+          </button>
+
+          <span className="text-xs font-medium text-[var(--text-muted)]">
+            Step {currentStep + 1} of {STEPS.length}
+          </span>
+
+          {isLastStep ? (
+            <motion.button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading}
+              whileHover={{ scale: loading ? 1 : 1.03 }}
+              whileTap={{ scale: loading ? 1 : 0.97 }}
+              className="rounded-lg px-6 py-2.5 text-sm font-bold text-white shadow-md disabled:opacity-50"
+              style={{ background: 'var(--gradient-accent)' }}
+            >
+              {loading ? 'Scoring...' : 'Predict Risk'}
+            </motion.button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="rounded-lg bg-[var(--brand)] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-hover)]"
+            >
+              Next
+            </button>
+          )}
         </div>
-      </form>
+      </div>
+
+      {submitError && <p className="mt-4 text-sm font-medium text-[var(--status-critical)]">{submitError}</p>}
 
       {result && (
         <motion.div
