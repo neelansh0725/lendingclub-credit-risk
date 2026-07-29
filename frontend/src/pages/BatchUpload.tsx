@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import { useDropzone } from 'react-dropzone'
 import { apiClient } from '../api/client'
 import RiskTierBadge from '../components/RiskTierBadge'
@@ -109,16 +110,21 @@ export default function BatchUpload() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Batch Upload</h1>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Batch Upload</h1>
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           Score a CSV of applicants at once — sort, filter, and export the results.
         </p>
-      </div>
+      </motion.div>
 
       <div
         {...getRootProps()}
-        className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-12 text-center transition-colors ${
+        className={`flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-200 hover:scale-[1.005] ${
           isDragActive
             ? 'border-[var(--brand)] bg-[var(--brand-tint)]'
             : 'border-[var(--border-strong)] bg-[var(--surface)] hover:border-[var(--brand)]'
@@ -145,7 +151,12 @@ export default function BatchUpload() {
       {error && <p className="mt-4 text-sm font-medium text-[var(--status-critical)]">{error}</p>}
 
       {results && (
-        <div className="mt-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="mt-8"
+        >
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-[var(--text-secondary)]">Filter by risk tier:</label>
@@ -168,7 +179,7 @@ export default function BatchUpload() {
             </button>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-[var(--border)] shadow-sm">
+          <div className="overflow-x-auto rounded-2xl border border-[var(--border)] shadow-sm">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--border)]" style={{ background: 'var(--surface-raised)' }}>
@@ -206,7 +217,7 @@ export default function BatchUpload() {
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   )

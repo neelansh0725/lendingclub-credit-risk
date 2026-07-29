@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { apiClient } from '../api/client'
 import RiskTierBadge from '../components/RiskTierBadge'
@@ -48,7 +49,7 @@ function FieldInput({
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
       <h2 className="mb-5 text-base font-semibold text-[var(--text-primary)]">{title}</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">{children}</div>
     </div>
@@ -99,12 +100,17 @@ export default function Predict() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Single Applicant Prediction</h1>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Single Applicant Prediction</h1>
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           Enter an applicant's loan and credit bureau details to get an instant default probability and explanation.
         </p>
-      </div>
+      </motion.div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <SectionCard title="Loan & Applicant Details">
@@ -132,23 +138,36 @@ export default function Predict() {
         </SectionCard>
 
         <div className="flex items-center gap-4">
-          <button
+          <motion.button
             type="submit"
             disabled={loading}
-            className="rounded-lg bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--brand-hover)] disabled:opacity-50"
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
+            className="rounded-lg px-6 py-2.5 text-sm font-bold text-white shadow-md disabled:opacity-50"
+            style={{ background: 'var(--gradient-accent)' }}
           >
             {loading ? 'Scoring...' : 'Predict Risk'}
-          </button>
+          </motion.button>
           {submitError && <p className="text-sm font-medium text-[var(--status-critical)]">{submitError}</p>}
         </div>
       </form>
 
       {result && (
-        <div className="mt-8 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
+          className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-md"
+        >
           <div className="mb-6 flex items-center gap-4">
-            <span className="text-4xl font-bold tabular-nums text-[var(--text-primary)]">
+            <motion.span
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.35, delay: 0.1 }}
+              className="text-4xl font-extrabold tabular-nums tracking-tight text-[var(--text-primary)]"
+            >
               {(result.probability * 100).toFixed(1)}%
-            </span>
+            </motion.span>
             <RiskTierBadge tier={result.risk_tier} />
           </div>
 
@@ -170,7 +189,7 @@ export default function Predict() {
                   contentStyle={{ background: 'var(--surface-raised)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }}
                   labelStyle={{ color: 'var(--text-primary)' }}
                 />
-                <Bar dataKey="shap_value" radius={2}>
+                <Bar dataKey="shap_value" radius={2} animationDuration={600}>
                   {chartData.map((entry, idx) => (
                     <Cell key={idx} fill={entry.shap_value >= 0 ? 'var(--status-critical)' : 'var(--status-good)'} />
                   ))}
@@ -188,7 +207,7 @@ export default function Predict() {
               Pushes risk down
             </span>
           </p>
-        </div>
+        </motion.div>
       )}
     </div>
   )

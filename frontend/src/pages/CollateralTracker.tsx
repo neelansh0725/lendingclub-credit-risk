@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { apiClient } from '../api/client'
 import AddCollateralForm, { type NewCollateral } from '../components/AddCollateralForm'
 import CollateralProgressBar from '../components/CollateralProgressBar'
@@ -114,12 +115,17 @@ export default function CollateralTracker() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Collateral Tracker</h1>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Collateral Tracker</h1>
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           Pledge collateral against a secured loan and track its release as repayments come in.
         </p>
-      </div>
+      </motion.div>
 
       <CreateLoanForm onSubmit={handleCreateLoan} submitting={creatingLoan} />
 
@@ -157,9 +163,19 @@ export default function CollateralTracker() {
       )}
 
       {collaterals && (
-        <div className="flex flex-col gap-4">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+          className="flex flex-col gap-4"
+        >
           {collaterals.map((c) => (
-            <div key={c.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+            <motion.div
+              key={c.id}
+              variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
+              whileHover={{ y: -2 }}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition-shadow hover:shadow-md"
+            >
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <span className="font-medium text-[var(--text-primary)]">{c.description}</span>{' '}
@@ -172,14 +188,14 @@ export default function CollateralTracker() {
                 remainingAmount={c.remaining_amount}
                 status={c.status}
               />
-            </div>
+            </motion.div>
           ))}
 
           <div className="mt-2 flex flex-col gap-4">
             <AddCollateralForm onSubmit={handleAddCollateral} submitting={addingCollateral} />
             <RepaymentForm onSubmit={handleRepayment} submitting={submitting} />
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   )

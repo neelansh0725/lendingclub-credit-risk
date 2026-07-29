@@ -41,7 +41,7 @@ export default function AddCollateralForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm"
+      className="flex flex-wrap items-end gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm"
     >
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-[var(--text-secondary)]">Type</span>

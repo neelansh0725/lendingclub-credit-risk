@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 
 const inputClasses =
   'rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-tint)]'
@@ -26,7 +27,7 @@ export default function RepaymentForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
+    <form onSubmit={handleSubmit} className="flex items-end gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-[var(--text-secondary)]">Record Repayment ($)</span>
         <input
@@ -37,13 +38,16 @@ export default function RepaymentForm({
           className={inputClasses}
         />
       </label>
-      <button
+      <motion.button
         type="submit"
         disabled={submitting}
-        className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--brand-hover)] disabled:opacity-50"
+        whileHover={{ scale: submitting ? 1 : 1.03 }}
+        whileTap={{ scale: submitting ? 1 : 0.97 }}
+        className="rounded-lg px-4 py-2 text-sm font-bold text-white shadow-md disabled:opacity-50"
+        style={{ background: 'var(--gradient-accent)' }}
       >
         {submitting ? 'Recording...' : 'Record'}
-      </button>
+      </motion.button>
       {error && <span className="text-xs font-medium text-[var(--status-critical)]">{error}</span>}
     </form>
   )

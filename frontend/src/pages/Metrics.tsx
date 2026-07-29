@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { apiClient } from '../api/client'
 
@@ -16,12 +17,36 @@ interface MetricsResponse {
   lightgbm: ModelMetrics
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
+const tileVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0 },
+}
+
+function StatTile({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
-      <div className="text-xs font-semibold tracking-wide text-[var(--text-muted)] uppercase">{label}</div>
-      <div className="mt-1 text-2xl font-bold tabular-nums text-[var(--text-primary)]">{value}</div>
-    </div>
+    <motion.div
+      variants={tileVariants}
+      whileHover={{ y: -3 }}
+      className="rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md"
+      style={
+        highlight
+          ? { background: 'var(--gradient-accent)', borderColor: 'transparent' }
+          : { background: 'var(--surface)', borderColor: 'var(--border)' }
+      }
+    >
+      <div
+        className="text-xs font-semibold tracking-wide uppercase"
+        style={{ color: highlight ? 'rgba(255,255,255,0.85)' : 'var(--text-muted)' }}
+      >
+        {label}
+      </div>
+      <div
+        className="mt-1 text-2xl font-extrabold tabular-nums"
+        style={{ color: highlight ? '#ffffff' : 'var(--text-primary)' }}
+      >
+        {value}
+      </div>
+    </motion.div>
   )
 }
 
@@ -57,15 +82,25 @@ function ModelSection({ title, metrics }: { title: string; metrics: ModelMetrics
     : []
 
   return (
-    <section className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
+    >
       <h2 className="mb-5 text-base font-semibold text-[var(--text-primary)]">{title}</h2>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="AUC-ROC" value={metrics.auc_roc.toFixed(4)} />
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
+        className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4"
+      >
+        <StatTile label="AUC-ROC" value={metrics.auc_roc.toFixed(4)} highlight />
         <StatTile label="Precision" value={metrics.precision.toFixed(4)} />
         <StatTile label="Recall" value={metrics.recall.toFixed(4)} />
         <StatTile label="F1" value={metrics.f1.toFixed(4)} />
-      </div>
+      </motion.div>
 
       {rocData.length > 0 && (
         <div className="mb-6">
@@ -108,7 +143,7 @@ function ModelSection({ title, metrics }: { title: string; metrics: ModelMetrics
           <ConfusionMatrix matrix={metrics.confusion_matrix} />
         </div>
       )}
-    </section>
+    </motion.section>
   )
 }
 
@@ -125,12 +160,17 @@ export default function Metrics() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Model Metrics</h1>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Model Metrics</h1>
+        <p className="mt-2 text-sm text-[var(--text-muted)]">
           Evaluation results for the primary and baseline models on the held-out test set.
         </p>
-      </div>
+      </motion.div>
 
       {error && <p className="text-sm font-medium text-[var(--status-critical)]">{error}</p>}
       {!data && !error && <p className="text-sm text-[var(--text-muted)]">Loading...</p>}

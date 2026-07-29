@@ -19,9 +19,12 @@
   --border: #e1e0d9;
   --border-strong: #c3c2b7;
 
-  --brand: #2a78d6;
-  --brand-hover: #1c5cab;
-  --brand-tint: #eaf2fc;
+  /* Brand accent — validated "orange" categorical slot from the dataviz palette. */
+  --brand: #eb6834;
+  --brand-hover: #d95926;
+  --brand-tint: #fdece2;
+
+  --gradient-accent: linear-gradient(135deg, #eb6834 0%, #d95a86 55%, #eda100 100%);
 
   --status-good: #0ca30c;
   --status-good-tint: #e6f6e6;
@@ -46,9 +49,11 @@
     --border: #2c2c2a;
     --border-strong: #383835;
 
-    --brand: #3987e5;
-    --brand-hover: #5598e7;
-    --brand-tint: #16273d;
+    --brand: #d95926;
+    --brand-hover: #eb6834;
+    --brand-tint: #2c1a10;
+
+    --gradient-accent: linear-gradient(135deg, #d95926 0%, #b0446a 55%, #c98500 100%);
 
     --status-good: #0ca30c;
     --status-good-tint: #103316;
