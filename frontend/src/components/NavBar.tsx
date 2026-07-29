@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 const links = [
-  { to: '/', label: 'Predict' },
+  { to: '/predict', label: 'Predict' },
   { to: '/batch', label: 'Batch Upload' },
   { to: '/metrics', label: 'Metrics' },
   { to: '/collateral', label: 'Collateral Tracker' },
 ]
 
-function Logo() {
+export function Logo() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -33,18 +33,17 @@ export default function NavBar() {
       className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--surface)]/85 backdrop-blur"
     >
       <div className="mx-auto flex max-w-6xl items-center gap-1 px-6 py-3.5">
-        <div className="mr-8 flex items-center gap-2.5">
+        <Link to="/" className="mr-8 flex items-center gap-2.5">
           <Logo />
           <span className="text-base font-bold tracking-tight text-[var(--text-primary)]">
             Credit Risk
           </span>
-        </div>
+        </Link>
 
         {links.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
-            end={link.to === '/'}
             className={({ isActive }) =>
               `rounded-lg px-3.5 py-1.5 text-sm font-semibold transition-colors ${
                 isActive
